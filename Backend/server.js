@@ -1,0 +1,87 @@
+/**
+ * Drone Telemetry Backend - Main Server
+ * Serveur Express + WebSocket pour la télémétrie drone
+ */
+
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const http = require('http');
+
+const { initWebSocket, broadcast } = require('./services/websocket');
+const { dataStore } = require('./services/dataStore');
+const { startMockDataGenerator } = require('./utils/mockData');
+const telemetryRoutes = require('./routes/telemetry');
+const aiRoutes = require('./routes/ai');
+
+const app = express();
+const server = http.createServer(app);
+
+const PORT = process.env.PORT || 3000;
+const MOCK_MODE = process.env.MOCK_MODE === 'true';
+
+// Middleware
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
+app.use(express.json());
+
+// Logging middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    next();
+});
+
+// Routes
+app.use('/api/telemetry', telemetryRoutes);
+app.use('/api/ai', aiRoutes);
+
+// Health check
+app.get('/api/status', (req, res) => {
+    res.json({
+        status: 'online',
+        mockMode: MOCK_MODE,
+        connectedClients: require('./services/websocket').getClientCount(),
+        dataPoints: dataStore.getCount(),
+        uptime: process.uptime()
+    });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+    res.json({
+        name: 'Drone Telemetry Backend',
+        version: '1.0.0',
+        endpoints: {
+            status: '/api/status',
+            telemetry: '/api/telemetry',
+            ai: '/api/ai/alert'
+        }
+    });
+});
+
+// Initialize WebSocket
+initWebSocket(server);
+
+// Start server
+server.listen(PORT, () => {
+    console.log(`
+╔══════════════════════════════════════════════════════════╗
+║          🚁 Drone Telemetry Backend Server 🚁            ║
+╠══════════════════════════════════════════════════════════╣
+║  HTTP Server:  http://localhost:${PORT}                    ║
+║  WebSocket:    ws://localhost:${PORT}                      ║
+║  Mock Mode:    ${MOCK_MODE ? 'ENABLED ✓' : 'DISABLED ✗'}                              ║
+╚══════════════════════════════════════════════════════════╝
+    `);
+    
+    // Start mock data generator if enabled
+    if (MOCK_MODE) {
+        console.log('📡 Starting mock data generator...');
+        startMockDataGenerator();
+    }
+});
+
+module.exports = { app, server };

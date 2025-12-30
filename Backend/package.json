@@ -1,0 +1,19 @@
+{
+  "name": "drone-telemetry-backend",
+  "version": "1.0.0",
+  "description": "Backend Node.js pour le système de télémétrie drone IoT",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["drone", "telemetry", "iot", "mpu6050", "raspberry-pi"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  }
+}

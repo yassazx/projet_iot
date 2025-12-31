@@ -1,0 +1,26 @@
+{
+  "model_type": "RandomForestClassifier",
+  "best_params": {
+    "max_depth": 5,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "n_estimators": 50
+  },
+  "accuracy": 0.9997394476289734,
+  "f1_score": 0.9997395321781835,
+  "cv_mean": 0.9793531068310328,
+  "cv_std": 0.04129378633793443,
+  "features": [
+    "angle_x",
+    "angle_y",
+    "angle_z",
+    "max_tilt"
+  ],
+  "labels": {
+    "0": "Stable",
+    "1": "Risque",
+    "2": "Renversement"
+  },
+  "training_samples": 15352,
+  "test_samples": 3838
+}

@@ -7,10 +7,17 @@
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "keywords": ["drone", "telemetry", "iot", "mpu6050", "raspberry-pi"],
+  "keywords": [
+    "drone",
+    "telemetry",
+    "iot",
+    "mpu6050",
+    "raspberry-pi"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",

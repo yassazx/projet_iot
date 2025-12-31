@@ -66,6 +66,73 @@ router.post('/alert', (req, res) => {
 });
 
 /**
+ * POST /api/ai/predict
+ * Predire le risque via le modèle Python (Flask API)
+ */
+const axios = require('axios');
+const FLASK_API_URL = 'http://127.0.0.1:5000/predict';
+
+router.post('/predict', async (req, res) => {
+    try {
+        const { angle_x, angle_y, angle_z } = req.body;
+
+        // Appel à l'API Flask
+        const response = await axios.post(FLASK_API_URL, {
+            angle_x,
+            angle_y,
+            angle_z
+        });
+
+        const { prediction, label, features } = response.data;
+
+        let alert = null;
+        let clientsNotified = 0;
+
+        // Si risque ou renversement, générer une alerte
+        if (prediction === 1 || prediction === 2) {
+            const severity = prediction === 2 ? 'danger' : 'warning';
+            const message = prediction === 2
+                ? `RENVERSEMENT DÉTECTÉ! (Inclinaison: ${features.max_tilt.toFixed(1)}°)`
+                : `Risque d'instabilité (Inclinaison: ${features.max_tilt.toFixed(1)}°)`;
+
+            alert = {
+                id: Date.now().toString(36),
+                severity,
+                message,
+                angle: features.max_tilt,
+                type: 'ai_prediction',
+                timestamp: Date.now()
+            };
+
+            // Ajouter à l'historique & Broadcast
+            alertHistory.unshift(alert);
+            if (alertHistory.length > MAX_ALERTS) alertHistory.pop();
+            clientsNotified = broadcastAlert(alert);
+
+            console.log(`🤖 AI Prediction: ${label} -> Alerte envoyée`);
+        } else {
+            console.log(`🤖 AI Prediction: ${label} (Stable)`);
+        }
+
+        res.json({
+            success: true,
+            prediction,
+            label,
+            alert_generated: !!alert,
+            data: response.data
+        });
+
+    } catch (error) {
+        console.error('Erreur POST /ai/predict:', error.message);
+        // Fallback or error response
+        if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({ error: 'Service AI (Flask) non disponible' });
+        }
+        res.status(500).json({ error: 'Erreur lors de la prédiction' });
+    }
+});
+
+/**
  * GET /api/ai/alerts
  * Obtenir l'historique des alertes
  */

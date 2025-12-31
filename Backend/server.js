@@ -8,11 +8,14 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 
-const { initWebSocket, broadcast } = require('./services/websocket');
+const { initWebSocket } = require('./services/websocket');
 const { dataStore } = require('./services/dataStore');
-const { startMockDataGenerator } = require('./utils/mockData');
+const { initDB } = require('./config/db');
 const telemetryRoutes = require('./routes/telemetry');
 const aiRoutes = require('./routes/ai');
+const authRoutes = require('./routes/auth');
+const dronesRoutes = require('./routes/drones');
+const mockRoutes = require('./routes/mock');
 
 const app = express();
 const server = http.createServer(app);
@@ -23,7 +26,7 @@ const MOCK_MODE = process.env.MOCK_MODE === 'true';
 // Middleware
 app.use(cors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
 app.use(express.json());
@@ -37,6 +40,9 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/drones', dronesRoutes);
+app.use('/api/mock', mockRoutes);
 
 // Health check
 app.get('/api/status', (req, res) => {
@@ -62,26 +68,26 @@ app.get('/', (req, res) => {
     });
 });
 
-// Initialize WebSocket
+// Initialize WebSocket (no auto-start mock data)
 initWebSocket(server);
 
 // Start server
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log(`
 ╔══════════════════════════════════════════════════════════╗
 ║          🚁 Drone Telemetry Backend Server 🚁            ║
 ╠══════════════════════════════════════════════════════════╣
 ║  HTTP Server:  http://localhost:${PORT}                    ║
 ║  WebSocket:    ws://localhost:${PORT}                      ║
-║  Mock Mode:    ${MOCK_MODE ? 'ENABLED ✓' : 'DISABLED ✗'}                              ║
+║  Mock Control: MANUAL (via UI toggle)                    ║
 ╚══════════════════════════════════════════════════════════╝
     `);
-    
-    // Start mock data generator if enabled
-    if (MOCK_MODE) {
-        console.log('📡 Starting mock data generator...');
-        startMockDataGenerator();
-    }
+
+    // Initialize database tables
+    await initDB();
+
+    console.log('📡 Mock data contrôlé manuellement via /api/mock/toggle');
 });
 
 module.exports = { app, server };
+

@@ -25,6 +25,7 @@ interface UseWebSocketReturn {
     connectionStatus: ConnectionStatus
     clearAlerts: () => void
     sendMessage: (message: object) => void
+    disconnect: () => void
 }
 
 /**
@@ -39,6 +40,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
     const wsRef = useRef<WebSocket | null>(null)
     const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const reconnectAttempts = useRef(0)
+    const isIntentionalClose = useRef(false) // Track if close is intentional
     const maxReconnectAttempts = 10
     const reconnectDelay = 3000
 
@@ -52,7 +54,27 @@ export function useWebSocket(url: string): UseWebSocketReturn {
         }
     }, [])
 
+    // Explicit disconnect function for navigation
+    const disconnect = useCallback(() => {
+        console.log('🛑 Déconnexion manuelle du WebSocket')
+        isIntentionalClose.current = true
+        if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current)
+            reconnectTimeoutRef.current = null
+        }
+        if (wsRef.current) {
+            wsRef.current.close()
+            wsRef.current = null
+        }
+        setConnectionStatus('disconnected')
+    }, [])
+
     const connect = useCallback(() => {
+        // Don't connect if intentionally closed
+        if (isIntentionalClose.current) {
+            return
+        }
+
         // Cleanup previous connection
         if (wsRef.current) {
             wsRef.current.close()
@@ -120,7 +142,13 @@ export function useWebSocket(url: string): UseWebSocketReturn {
                 setConnectionStatus('disconnected')
                 wsRef.current = null
 
-                // Reconnexion automatique
+                // Don't reconnect if intentionally closed (navigating away)
+                if (isIntentionalClose.current) {
+                    console.log('🛑 Fermeture intentionnelle - pas de reconnexion')
+                    return
+                }
+
+                // Reconnexion automatique only for unexpected closures
                 if (reconnectAttempts.current < maxReconnectAttempts) {
                     reconnectAttempts.current++
                     console.log(`🔄 Reconnexion dans ${reconnectDelay / 1000}s (tentative ${reconnectAttempts.current}/${maxReconnectAttempts})`)
@@ -140,6 +168,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
 
     // Connexion initiale
     useEffect(() => {
+        isIntentionalClose.current = false // Reset on mount
         connect()
 
         // Ping périodique pour maintenir la connexion
@@ -149,8 +178,10 @@ export function useWebSocket(url: string): UseWebSocketReturn {
             }
         }, 30000)
 
-        // Cleanup
+        // Cleanup - mark as intentional close before closing
         return () => {
+            console.log('🛑 Nettoyage WebSocket - fermeture intentionnelle')
+            isIntentionalClose.current = true
             clearInterval(pingInterval)
             if (reconnectTimeoutRef.current) {
                 clearTimeout(reconnectTimeoutRef.current)
@@ -166,6 +197,7 @@ export function useWebSocket(url: string): UseWebSocketReturn {
         alerts,
         connectionStatus,
         clearAlerts,
-        sendMessage
+        sendMessage,
+        disconnect
     }
 }

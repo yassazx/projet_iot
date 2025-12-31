@@ -1,0 +1,123 @@
+/* ========================================
+   DRONE PROFILE CARD STYLES
+   ======================================== */
+
+.drone-profile-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.drone-profile-card:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+    transform: translateY(-3px);
+}
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.drone-icon {
+    font-size: 2.5rem;
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.75rem;
+    border-radius: 12px;
+}
+
+.card-info {
+    flex: 1;
+}
+
+.card-info h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.model-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #c4b5fd;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+    padding: 0.25rem;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+}
+
+.card-description {
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.card-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.spec-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    min-width: 80px;
+}
+
+.spec-label {
+    font-size: 0.65rem;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.spec-value {
+    font-size: 0.85rem;
+    color: #e4e4e7;
+    font-weight: 500;
+}
+
+.connect-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.connect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}

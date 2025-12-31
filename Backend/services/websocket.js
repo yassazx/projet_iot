@@ -7,6 +7,14 @@ const WebSocket = require('ws');
 
 let wss = null;
 let clients = new Set();
+let mockDataController = null; // Will be set from server.js
+
+/**
+ * Set mock data controller functions
+ */
+function setMockDataController(controller) {
+    mockDataController = controller;
+}
 
 /**
  * Initialiser le serveur WebSocket
@@ -19,6 +27,12 @@ function initWebSocket(server) {
         clients.add(ws);
 
         console.log(`🔌 Client connecté: ${clientId} (Total: ${clients.size})`);
+
+        // Start mock data if this is the first client and mock mode is enabled
+        if (clients.size === 1 && mockDataController && mockDataController.shouldUseMock()) {
+            console.log('🚀 Premier client connecté - Démarrage mock data...');
+            mockDataController.start();
+        }
 
         // Envoyer un message de bienvenue
         ws.send(JSON.stringify({
@@ -47,6 +61,12 @@ function initWebSocket(server) {
         ws.on('close', () => {
             clients.delete(ws);
             console.log(`🔌 Client déconnecté: ${clientId} (Total: ${clients.size})`);
+
+            // Stop mock data if no more clients
+            if (clients.size === 0 && mockDataController) {
+                console.log('⏹️  Aucun client - Arrêt mock data...');
+                mockDataController.stop();
+            }
         });
 
         // Gérer les erreurs
@@ -118,6 +138,7 @@ function closeAll() {
 
 module.exports = {
     initWebSocket,
+    setMockDataController,
     broadcast,
     broadcastTelemetry,
     broadcastAlert,

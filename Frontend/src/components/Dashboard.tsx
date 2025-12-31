@@ -70,6 +70,28 @@ function Dashboard({ telemetry }: DashboardProps) {
                     </div>
                 )}
 
+                {/* Humidité DHT22 */}
+                {(telemetry as any)?.humidity !== undefined && (telemetry as any)?.humidity !== null && (
+                    <div className="metric-card humidity" style={{ marginTop: '0.5rem' }}>
+                        <div className="metric-label">💧 Humidité</div>
+                        <div className="metric-value">
+                            {formatTemp((telemetry as any).humidity)}
+                            <span className="metric-unit">%</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Vitesse Moteur Arduino */}
+                {(telemetry as any)?.motorSpeed !== undefined && (telemetry as any)?.motorSpeed !== null && (
+                    <div className="metric-card motor" style={{ marginTop: '0.5rem' }}>
+                        <div className="metric-label">⚡ Moteur</div>
+                        <div className="metric-value">
+                            {formatTemp((telemetry as any).motorSpeed)}
+                            <span className="metric-unit">%</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Timestamp */}
                 {telemetry?.timestamp && (
                     <div className="timestamp" style={{

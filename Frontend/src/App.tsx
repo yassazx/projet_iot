@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment, PerspectiveCamera } from '@react-three/drei'
 import Drone3D from './components/Drone3D'
+import DroneSimple from './components/DroneSimple'
 import DroneModelViewer from './components/DroneModelViewer'
 import Dashboard from './components/Dashboard'
 import AlertPanel from './components/AlertPanel'
@@ -212,18 +213,27 @@ function App() {
               {/* Grid */}
               <gridHelper args={[20, 20, '#444', '#333']} />
 
-              {/* Drone - Use GLB model if available, otherwise procedural */}
-              {droneProfile?.model_file ? (
-                <DroneModelViewer
-                  modelFile={droneProfile.model_file}
+              {/* Choix du modèle de drone */}
+              {droneProfile?.is_manipulable ? (
+                // Drone MANIPULABLE - Répond aux données mock
+                <DroneSimple
                   pitch={telemetry?.pitch || 0}
                   roll={simulatedRoll !== null ? simulatedRoll : (telemetry?.roll || 0)}
                   yaw={telemetry?.yaw || 0}
                 />
+              ) : droneProfile?.selected_skin ? (
+                // Drone VISION avec skin GLB sélectionné
+                <DroneModelViewer
+                  modelFile={droneProfile.selected_skin}
+                  pitch={telemetry?.pitch || 0}
+                  roll={telemetry?.roll || 0}
+                  yaw={telemetry?.yaw || 0}
+                />
               ) : (
+                // Drone VISION procédural (défaut)
                 <Drone3D
                   pitch={telemetry?.pitch || 0}
-                  roll={simulatedRoll !== null ? simulatedRoll : (telemetry?.roll || 0)}
+                  roll={telemetry?.roll || 0}
                   yaw={telemetry?.yaw || 0}
                 />
               )}
@@ -244,27 +254,41 @@ function App() {
 
         {/* Side Panel */}
         <aside className="side-panel" style={{ width: `${100 - viewerWidth}%` }}>
-          {/* Mock Data Control */}
-          <MockDataToggle />
+          {/* Mock Data Control - SEULEMENT pour drone manipulable */}
+          {droneProfile?.is_manipulable ? (
+            <>
+              <MockDataToggle />
 
-          <div className="p-4 border-b border-gray-700 bg-gray-900">
-            <h2 className="text-xl font-bold mb-4 text-blue-400">Simulation</h2>
-            <div className="flex flex-col items-center fade-in">
-              <SimulationWheel
-                onAngleChange={handleSimulationAngle}
-                onLiveRotation={handleLiveSimulation}
-                isLoading={simulationLoading}
-              />
-              {simulatedRoll !== null && (
-                <button
-                  onClick={handleResetSimulation}
-                  className="w-full mt-2 text-xs text-blue-400 hover:text-blue-300 underline"
-                >
-                  Réinitialiser (Retour Télémétrie)
-                </button>
-              )}
+              <div className="p-4 border-b border-gray-700 bg-gray-900">
+                <h2 className="text-xl font-bold mb-4 text-blue-400">Simulation</h2>
+                <div className="flex flex-col items-center fade-in">
+                  <SimulationWheel
+                    onAngleChange={handleSimulationAngle}
+                    onLiveRotation={handleLiveSimulation}
+                    isLoading={simulationLoading}
+                  />
+                  {simulatedRoll !== null && (
+                    <button
+                      onClick={handleResetSimulation}
+                      className="w-full mt-2 text-xs text-blue-400 hover:text-blue-300 underline"
+                    >
+                      Réinitialiser (Retour Télémétrie)
+                    </button>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="card" style={{ marginBottom: '1rem', textAlign: 'center', padding: '1rem' }}>
+              <span style={{ fontSize: '1.5rem' }}>👁️</span>
+              <p style={{ color: '#a1a1aa', marginTop: '0.5rem' }}>Mode Vision Uniquement</p>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                {droneProfile?.selected_skin
+                  ? `Skin: ${droneProfile.selected_skin.includes('camera') ? 'Caméra' : 'Design'}`
+                  : 'Skin: Procédural (défaut)'}
+              </p>
             </div>
-          </div>
+          )}
 
           <Dashboard telemetry={telemetry} />
           <AlertPanel alerts={alerts} onClear={clearAlerts} />

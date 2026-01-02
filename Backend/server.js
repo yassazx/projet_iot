@@ -16,6 +16,8 @@ const aiRoutes = require('./routes/ai');
 const authRoutes = require('./routes/auth');
 const dronesRoutes = require('./routes/drones');
 const mockRoutes = require('./routes/mock');
+const recommendRoutes = require('./routes/recommend');
+const historyRoutes = require('./routes/history');
 
 const app = express();
 const server = http.createServer(app);
@@ -26,7 +28,7 @@ const MOCK_MODE = process.env.MOCK_MODE === 'true';
 // Middleware
 app.use(cors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
 }));
 app.use(express.json());
@@ -43,6 +45,8 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/drones', dronesRoutes);
 app.use('/api/mock', mockRoutes);
+app.use('/api/recommend', recommendRoutes);
+app.use('/api/history', historyRoutes);
 
 // Health check
 app.get('/api/status', (req, res) => {

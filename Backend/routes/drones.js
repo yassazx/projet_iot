@@ -31,7 +31,7 @@ router.get('/models', async (req, res) => {
 router.get('/profiles', authMiddleware, async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT dp.*, dm.name as model_name, dm.brand, dm.model_file, dm.specs
+            `SELECT dp.*, dm.name as model_name, dm.brand, dm.model_file, dm.is_manipulable, dm.specs
              FROM drone_profiles dp
              LEFT JOIN drone_models dm ON dp.model_id = dm.id
              WHERE dp.user_id = $1
@@ -144,32 +144,73 @@ router.delete('/profiles/:id', authMiddleware, async (req, res) => {
 
 /**
  * POST /api/drones/reset-models
- * Reset drone models to match actual GLB files (dev only)
+ * Reset drone models to match Vision/Manipulable profiles
  */
 router.post('/reset-models', async (req, res) => {
     try {
-        // Delete existing profiles and models
         await pool.query('DELETE FROM drone_profiles');
         await pool.query('DELETE FROM drone_models');
 
-        // Insert models matching actual GLB files
         await pool.query(`
-            INSERT INTO drone_models (name, brand, model_file, specs) VALUES
-            ('Drone Caméra', 'Standard', 'animated_drone_with_camera_free.glb', '{"weight": "1200g", "flight_time": "25min", "max_speed": "60km/h"}'),
-            ('Drone Design', 'Custom', 'drone_design.glb', '{"weight": "800g", "flight_time": "30min", "max_speed": "70km/h"}')
+            INSERT INTO drone_models (name, brand, model_file, is_manipulable, specs) VALUES
+            ('Drone Vision Standard', 'Vision', NULL, false, '{"weight": "1200g", "flight_time": "25min", "max_speed": "60km/h", "description": "Drone pour observation uniquement"}'),
+            ('Drone Simulation Pro', 'Manipulable', NULL, true, '{"weight": "800g", "flight_time": "30min", "max_speed": "70km/h", "description": "Drone manipulable avec mock data"}')
         `);
 
         const models = await pool.query('SELECT * FROM drone_models ORDER BY name');
 
         res.json({
             success: true,
-            message: 'Modèles réinitialisés avec succès',
+            message: 'Modèles réinitialisés (Vision + Manipulable)',
             models: models.rows
         });
     } catch (err) {
         console.error('Error resetting models:', err);
         res.status(500).json({ error: 'Erreur lors de la réinitialisation' });
     }
+});
+
+/**
+ * PATCH /api/drones/profiles/:id/skin
+ * Update selected skin for a drone profile (protected)
+ */
+router.patch('/profiles/:id/skin', authMiddleware, async (req, res) => {
+    try {
+        const { selected_skin } = req.body;
+
+        const result = await pool.query(
+            `UPDATE drone_profiles 
+             SET selected_skin = $1 
+             WHERE id = $2 AND user_id = $3 
+             RETURNING *`,
+            [selected_skin, req.params.id, req.user.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Profil non trouvé' });
+        }
+
+        res.json({
+            message: 'Skin mis à jour avec succès',
+            profile: result.rows[0]
+        });
+    } catch (err) {
+        console.error('Error updating skin:', err);
+        res.status(500).json({ error: 'Erreur lors de la mise à jour du skin' });
+    }
+});
+
+/**
+ * GET /api/drones/available-skins
+ * Get list of available 3D skins
+ */
+router.get('/available-skins', (req, res) => {
+    const skins = [
+        { id: 'procedural', name: 'Procédural (Défaut)', file: null, preview: '🚁' },
+        { id: 'camera', name: 'Drone Caméra', file: 'animated_drone_with_camera_free.glb', preview: '📷' },
+        { id: 'design', name: 'Drone Design', file: 'drone_design.glb', preview: '✨' }
+    ];
+    res.json({ skins });
 });
 
 module.exports = router;

@@ -43,9 +43,16 @@ const initDB = async () => {
                 brand VARCHAR(100),
                 image_url VARCHAR(255),
                 model_file VARCHAR(255),
+                is_manipulable BOOLEAN DEFAULT false,
                 specs JSONB,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+        `);
+
+        // Add is_manipulable column if not exists
+        await client.query(`
+            ALTER TABLE drone_models 
+            ADD COLUMN IF NOT EXISTS is_manipulable BOOLEAN DEFAULT false;
         `);
 
         // Drone profiles table (user's drones)
@@ -56,20 +63,46 @@ const initDB = async () => {
                 model_id INTEGER REFERENCES drone_models(id),
                 name VARCHAR(100) NOT NULL,
                 description TEXT,
+                selected_skin VARCHAR(255) DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+
+        // Add selected_skin column if not exists
+        await client.query(`
+            ALTER TABLE drone_profiles 
+            ADD COLUMN IF NOT EXISTS selected_skin VARCHAR(255) DEFAULT NULL;
+        `);
+
+        // ML History table for predictions and recommendations
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS ml_history (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR(20) NOT NULL,
+                prototype_name VARCHAR(100) NOT NULL,
+                form_data JSONB,
+                result JSONB,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // Add index for faster queries
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_ml_history_user_id 
+            ON ml_history(user_id, created_at DESC);
+        `);
+
 
         // Insert default drone models if empty
         const modelCount = await client.query('SELECT COUNT(*) FROM drone_models');
         if (parseInt(modelCount.rows[0].count) === 0) {
             await client.query(`
-                INSERT INTO drone_models (name, brand, model_file, specs) VALUES
-                ('Drone Caméra', 'Standard', 'animated_drone_with_camera_free.glb', '{"weight": "1200g", "flight_time": "25min", "max_speed": "60km/h"}'),
-                ('Drone Design', 'Custom', 'drone_design.glb', '{"weight": "800g", "flight_time": "30min", "max_speed": "70km/h"}'),
-                ('Drone Générique', 'DIY', 'generic.glb', '{"weight": "variable", "flight_time": "variable", "max_speed": "variable"}');
+                INSERT INTO drone_models (name, brand, model_file, is_manipulable, specs) VALUES
+                ('Drone Vision Standard', 'Vision', NULL, false, '{"weight": "1200g", "flight_time": "25min", "max_speed": "60km/h", "description": "Drone pour observation uniquement"}'),
+                ('Drone Simulation Pro', 'Manipulable', NULL, true, '{"weight": "800g", "flight_time": "30min", "max_speed": "70km/h", "description": "Drone manipulable répondant aux données mock"}');
             `);
-            console.log('📋 Default drone models inserted');
+            console.log('📋 Default drone models inserted (Vision + Manipulable)');
         }
 
         console.log('✅ Database tables initialized');

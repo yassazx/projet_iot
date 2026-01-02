@@ -138,35 +138,35 @@ function ConnectDronePage() {
                     </div>
                 </div>
 
-                {/* Connection Section */}
+                {/* Connection Section - Two Cards */}
                 <div className="connection-section">
                     <h2>Connexion au drone</h2>
                     <p>Assurez-vous que votre drone est allumé et à portée</p>
 
-                    <div className="connection-status">
-                        <div className="status-indicator">
-                            <span className={`status-dot ${connecting ? 'connecting' : 'ready'}`}></span>
-                            <span>{connecting ? 'Connexion en cours...' : 'Prêt à connecter'}</span>
+                    <div className="connection-cards">
+                        {/* Status Card */}
+                        <div className="connection-card status-card">
+                            <div className={`status-icon ${connecting ? 'connecting' : 'ready'}`}>
+                                {connecting ? '🔄' : '✓'}
+                            </div>
+                            <span className="card-label">
+                                {connecting ? 'Connexion...' : 'Prêt'}
+                            </span>
+                        </div>
+
+                        {/* Connect Button Card */}
+                        <div
+                            className={`connection-card action-card ${connecting ? 'disabled' : ''}`}
+                            onClick={!connecting ? handleConnect : undefined}
+                        >
+                            <div className="action-icon">
+                                {connecting ? '⏳' : '🔗'}
+                            </div>
+                            <span className="card-label">
+                                {connecting ? 'Patientez...' : 'Connecter'}
+                            </span>
                         </div>
                     </div>
-
-                    <button
-                        className={`connect-btn ${connecting ? 'loading' : ''}`}
-                        onClick={handleConnect}
-                        disabled={connecting}
-                    >
-                        {connecting ? (
-                            <>
-                                <span className="spinner"></span>
-                                Connexion...
-                            </>
-                        ) : (
-                            <>
-                                <span>🔗</span>
-                                Connecter le drone
-                            </>
-                        )}
-                    </button>
                 </div>
             </div>
         </div>

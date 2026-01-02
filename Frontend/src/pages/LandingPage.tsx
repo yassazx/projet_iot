@@ -11,7 +11,6 @@ function LandingPage() {
             <nav className="landing-nav">
                 <div className="nav-container">
                     <div className="nav-logo">
-                        <span className="logo-icon">🚁</span>
                         <span className="logo-text">DroneIOT</span>
                     </div>
 
@@ -39,7 +38,6 @@ function LandingPage() {
                 <div className="hero-bg-animation"></div>
                 <div className="hero-content">
                     <div className="hero-badge">
-                        <span className="badge-icon">✨</span>
                         <span>Système de Télémétrie Avancé</span>
                     </div>
                     <h1 className="hero-title">
@@ -117,37 +115,37 @@ function LandingPage() {
 
                 <div className="features-grid">
                     <div className="feature-card">
-                        <div className="feature-icon">📡</div>
+                        <div className="feature-icon">1</div>
                         <h3>Télémétrie Temps Réel</h3>
                         <p>Recevez les données de vos capteurs MPU6050 instantanément via WebSocket.</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">🎮</div>
+                        <div className="feature-icon">2</div>
                         <h3>Visualisation 3D</h3>
                         <p>Visualisez l'orientation de votre drone en temps réel avec un modèle 3D interactif.</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">🤖</div>
+                        <div className="feature-icon">3</div>
                         <h3>Prédictions IA</h3>
                         <p>Anticipez les risques de renversement grâce à notre modèle de Machine Learning.</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">🔔</div>
+                        <div className="feature-icon">4</div>
                         <h3>Alertes Intelligentes</h3>
                         <p>Recevez des alertes en temps réel lorsque des situations critiques sont détectées.</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">📊</div>
+                        <div className="feature-icon">5</div>
                         <h3>Dashboard Complet</h3>
                         <p>Tableau de bord intuitif avec toutes les métriques importantes à portée de main.</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">🔒</div>
+                        <div className="feature-icon">6</div>
                         <h3>Sécurisé</h3>
                         <p>Authentification JWT et connexions sécurisées pour protéger vos données.</p>
                     </div>
@@ -190,12 +188,15 @@ function LandingPage() {
             {/* Footer */}
             <footer className="landing-footer">
                 <div className="footer-content">
-                    <div className="footer-logo">
-                        <span className="logo-icon">🚁</span>
-                        <span className="logo-text">DroneIOT</span>
+                    <div className="footer-logos">
+                        <img src="/logos/ensa-berrechid.png" alt="ENSA Berrechid" className="university-logo" />
+                        <div className="footer-logo">
+                            <span className="logo-text">DroneIOT</span>
+                        </div>
+                        <img src="/logos/uh1.png" alt="Université Hassan 1er" className="university-logo" />
                     </div>
                     <p>Projet IoT - Système de Télémétrie Drone avec MPU6050</p>
-                    <p className="copyright">© 2024 DroneIOT. Tous droits réservés.</p>
+                    <p className="copyright">© 2024 DroneIOT - ENSA Berrechid. Tous droits réservés.</p>
                 </div>
             </footer>
         </div>

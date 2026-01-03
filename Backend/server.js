@@ -18,6 +18,7 @@ const dronesRoutes = require('./routes/drones');
 const mockRoutes = require('./routes/mock');
 const recommendRoutes = require('./routes/recommend');
 const historyRoutes = require('./routes/history');
+const droneRatingRoutes = require('./routes/droneRating');
 
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +48,7 @@ app.use('/api/drones', dronesRoutes);
 app.use('/api/mock', mockRoutes);
 app.use('/api/recommend', recommendRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/drone-rating', droneRatingRoutes);
 
 // Health check
 app.get('/api/status', (req, res) => {

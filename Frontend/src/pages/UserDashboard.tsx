@@ -161,7 +161,7 @@ function UserDashboard() {
                         className={`nav-tab ${activeTab === 'ml' ? 'active' : ''}`}
                         onClick={() => setActiveTab('ml')}
                     >
-                        Prédiction ML
+                        Analyse IA
                     </button>
                     <button
                         className={`nav-tab ${activeTab === 'history' ? 'active' : ''}`}

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import './MLPredictionTab.css'; // Reuse existing styles
+import './GlobalHistoryTab.css';
 
 interface HistoryItem {
     id: number;
-    type: 'prediction' | 'recommendation';
+    type: 'prediction' | 'recommendation' | 'rating';
     prototypeName: string;
     formData: Record<string, unknown>;
     result: Record<string, unknown>;
@@ -14,7 +14,7 @@ interface HistoryItem {
 function GlobalHistoryTab() {
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+    const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
     const [total, setTotal] = useState(0);
 
     const { token } = useAuth();
@@ -51,46 +51,49 @@ function GlobalHistoryTab() {
             if (res.ok) {
                 setHistory(prev => prev.filter(h => h.id !== id));
                 setTotal(prev => prev - 1);
+                if (selectedItem?.id === id) {
+                    setSelectedItem(null);
+                }
             }
         } catch (err) {
             console.error('Error deleting:', err);
         }
     };
 
-    const toggleCard = (id: number) => {
-        setExpandedCards(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(id)) {
-                newSet.delete(id);
-            } else {
-                newSet.add(id);
-            }
-            return newSet;
-        });
+    const selectItem = (item: HistoryItem) => {
+        setSelectedItem(selectedItem?.id === item.id ? null : item);
     };
 
-    const getRiskColor = (risk: string) => {
-        switch (risk) {
-            case 'low': return '#10b981';
-            case 'medium': return '#f59e0b';
-            case 'high': return '#ef4444';
-            default: return '#6b7280';
+    const formatDateTime = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return {
+            date: date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            time: date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        };
+    };
+
+    const getTypeLabel = (type: string) => {
+        switch (type) {
+            case 'prediction': return 'Prédiction';
+            case 'recommendation': return 'Recommandation';
+            case 'rating': return 'Fiabilité';
+            default: return type;
         }
     };
 
-    const getRiskLabel = (risk: string) => {
-        switch (risk) {
-            case 'low': return 'Faible';
-            case 'medium': return 'Moyen';
-            case 'high': return 'Élevé';
-            default: return 'Inconnu';
+    const getTypeColor = (type: string) => {
+        switch (type) {
+            case 'prediction': return '#8b5cf6';
+            case 'recommendation': return '#10b981';
+            case 'rating': return '#f59e0b';
+            default: return '#6b7280';
         }
     };
 
     if (loading) {
         return (
-            <div className="ml-prediction-tab">
-                <div className="empty-history">
+            <div className="global-history-tab">
+                <div className="history-loading">
                     <p>Chargement de l'historique...</p>
                 </div>
             </div>
@@ -98,109 +101,133 @@ function GlobalHistoryTab() {
     }
 
     return (
-        <div className="ml-prediction-tab">
+        <div className="global-history-tab">
             {/* Header */}
-            <div className="ml-info-banner">
-                <div className="ml-info-text">
-                    <h3>Historique Global</h3>
-                    <p>{total} entrée{total !== 1 ? 's' : ''} sauvegardée{total !== 1 ? 's' : ''}</p>
-                </div>
+            <div className="history-header">
+                <h2>Historique Global</h2>
+                <span className="history-count">{total} entrée{total !== 1 ? 's' : ''}</span>
             </div>
 
-            {/* History List */}
-            <div className="prediction-history-section" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                {history.length === 0 ? (
-                    <div className="empty-history">
-                        <p>Aucun historique sauvegardé</p>
-                        <p className="hint">Les prédictions et recommandations seront sauvegardées ici</p>
-                    </div>
-                ) : (
-                    <div className="predictions-list">
-                        {history.map(item => {
-                            const isExpanded = expandedCards.has(item.id);
-                            const result = item.result as Record<string, unknown>;
-                            const reliability = result?.reliability as number | undefined;
-                            const riskLevel = result?.riskLevel as string | undefined;
-                            const parts = result?.parts as Record<string, string> | undefined;
+            {history.length === 0 ? (
+                <div className="history-empty">
+                    <p>Aucun historique sauvegardé</p>
+                    <p className="hint">Les prédictions et recommandations seront sauvegardées ici</p>
+                </div>
+            ) : (
+                <div className={`history-content ${selectedItem ? 'split-view' : ''}`}>
+                    {/* List Panel */}
+                    <div className="history-list-panel">
+                        <div className="history-list">
+                            {history.map(item => {
+                                const { date, time } = formatDateTime(item.createdAt);
+                                const isSelected = selectedItem?.id === item.id;
 
-                            return (
-                                <div
-                                    key={item.id}
-                                    className={`history-card ${item.type} ${isExpanded ? 'expanded' : 'collapsed'}`}
-                                >
-                                    {/* Clickable Header */}
+                                return (
                                     <div
-                                        className="card-header-clickable"
-                                        onClick={() => toggleCard(item.id)}
+                                        key={item.id}
+                                        className={`history-item ${item.type} ${isSelected ? 'selected' : ''}`}
+                                        onClick={() => selectItem(item)}
+                                        style={{ borderLeftColor: getTypeColor(item.type) }}
                                     >
-                                        <div className="header-left">
-                                            {item.type === 'prediction' ? (
-                                                <span className="type-badge prediction">P</span>
-                                            ) : (
-                                                <span className="type-badge recommendation">R</span>
-                                            )}
-                                            <span className="prototype-name-mini">{item.prototypeName}</span>
-                                            {item.type === 'prediction' && reliability !== undefined && (
-                                                <span
-                                                    className="score-mini"
-                                                    style={{ color: getRiskColor(riskLevel || 'medium') }}
-                                                >
-                                                    {reliability}%
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="header-right">
-                                            <span className="timestamp-mini">
-                                                {new Date(item.createdAt).toLocaleDateString('fr-FR')}
+                                        <div className="item-header">
+                                            <span
+                                                className="item-type-badge"
+                                                style={{ backgroundColor: getTypeColor(item.type) }}
+                                            >
+                                                {getTypeLabel(item.type)}
                                             </span>
-                                            <span className={`chevron ${isExpanded ? 'open' : ''}`}>▼</span>
+                                            <span className="item-datetime">{date} à {time}</span>
+                                        </div>
+                                        <div className="item-name">{item.prototypeName}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Details Panel */}
+                    {selectedItem && (
+                        <div className="history-details-panel">
+                            <div className="details-header">
+                                <div className="details-title">
+                                    <span
+                                        className="details-type-badge"
+                                        style={{ backgroundColor: getTypeColor(selectedItem.type) }}
+                                    >
+                                        {getTypeLabel(selectedItem.type)}
+                                    </span>
+                                    <h3>{selectedItem.prototypeName}</h3>
+                                </div>
+                                <span className="details-datetime">
+                                    {formatDateTime(selectedItem.createdAt).date} à {formatDateTime(selectedItem.createdAt).time}
+                                </span>
+                            </div>
+
+                            <div className="details-content">
+                                {/* Rating Details */}
+                                {selectedItem.type === 'rating' && (
+                                    <div className="details-section">
+                                        <h4>Score de Fiabilité</h4>
+                                        <div className="score-display">
+                                            <span className="score-value">{(selectedItem.result as { score?: number }).score}/100</span>
+                                            <span className="score-label">{(selectedItem.result as { label?: string }).label}</span>
+                                        </div>
+                                        <p className="score-explanation">{(selectedItem.result as { explanation?: string }).explanation}</p>
+                                    </div>
+                                )}
+
+                                {/* Prediction Details */}
+                                {selectedItem.type === 'prediction' && (
+                                    <div className="details-section">
+                                        <h4>Résultat de Prédiction</h4>
+                                        <div className="score-display">
+                                            <span className="score-value">{(selectedItem.result as { reliability?: number }).reliability}%</span>
+                                            <span className="score-label">Fiabilité</span>
                                         </div>
                                     </div>
+                                )}
 
-                                    {/* Expanded Content */}
-                                    {isExpanded && (
-                                        <div className="card-content-expanded">
-                                            {/* Prediction Details */}
-                                            {item.type === 'prediction' && reliability !== undefined && (
-                                                <>
-                                                    <div className="compact-score">
-                                                        <div
-                                                            className="score-bar"
-                                                            style={{
-                                                                width: `${reliability}%`,
-                                                                background: getRiskColor(riskLevel || 'medium')
-                                                            }}
-                                                        />
-                                                        <span>Fiabilité: {reliability}% - Risque {getRiskLabel(riskLevel || 'medium')}</span>
+                                {/* Recommendation Details */}
+                                {selectedItem.type === 'recommendation' && (
+                                    <div className="details-section">
+                                        <h4>Pièces Recommandées</h4>
+                                        <div className="parts-list">
+                                            {Object.entries((selectedItem.result as { parts?: Record<string, string> }).parts || {}).map(([key, value]) => (
+                                                value && (
+                                                    <div key={key} className="part-item">
+                                                        <strong>{key}:</strong> {value}
                                                     </div>
-                                                </>
-                                            )}
-
-                                            {/* Recommendation Parts */}
-                                            {item.type === 'recommendation' && parts && (
-                                                <div className="parts-compact">
-                                                    {parts.motor && <div className="part-row"><strong>Moteur:</strong> {parts.motor}</div>}
-                                                    {parts.esc && <div className="part-row"><strong>ESC:</strong> {parts.esc}</div>}
-                                                    {parts.flightController && <div className="part-row"><strong>Contrôleur:</strong> {parts.flightController}</div>}
-                                                    {parts.battery && <div className="part-row"><strong>Batterie:</strong> {parts.battery}</div>}
-                                                </div>
-                                            )}
-
-                                            {/* Delete Button */}
-                                            <button
-                                                className="delete-entry-btn"
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                                            >
-                                                Supprimer
-                                            </button>
+                                                )
+                                            ))}
                                         </div>
-                                    )}
+                                    </div>
+                                )}
+
+                                {/* Form Data */}
+                                <div className="details-section">
+                                    <h4>Paramètres d'entrée</h4>
+                                    <div className="form-data-grid">
+                                        {Object.entries(selectedItem.formData).filter(([key]) => key !== 'prototypeName').map(([key, value]) => (
+                                            <div key={key} className="form-data-item">
+                                                <span className="data-label">{key}</span>
+                                                <span className="data-value">{String(value)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
+
+                                {/* Delete Button */}
+                                <button
+                                    className="delete-btn"
+                                    onClick={() => handleDelete(selectedItem.id)}
+                                >
+                                    Supprimer cette entrée
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

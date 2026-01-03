@@ -5,6 +5,10 @@
 # Ignore AI folder completely
 AI/
 
+# ML Model files (too large for GitHub)
+*.pkl
+__pycache__/
+
 # ==========================================
 # Dependencies
 # ==========================================

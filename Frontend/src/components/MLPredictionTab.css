@@ -462,6 +462,17 @@
     box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
 }
 
+.recommend-btn.full-width {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
 .action-buttons button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
@@ -834,4 +845,245 @@
 .delete-entry-btn:hover {
     background: rgba(239, 68, 68, 0.25);
     color: #ef4444;
+}
+
+/* ========================================
+   SUB-TABS NAVIGATION
+   ======================================== */
+
+.sub-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+.sub-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sub-tab:hover {
+    color: #e5e7eb;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sub-tab.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2));
+    color: #e5e7eb;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+/* Rating Badge & Button */
+.type-badge.rating {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+.history-card.rating {
+    border-left: 3px solid #f59e0b;
+}
+
+.rating-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+
+.rating-btn:hover:not(:disabled) {
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4) !important;
+}
+
+.rating-badge {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1)) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    color: #f59e0b !important;
+}
+
+.rating-explanation {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 8px;
+}
+
+.rating-explanation p {
+    margin: 0;
+    color: #fde68a;
+    font-size: 0.85rem;
+}
+
+/* ========================================
+   RATING PARAMETERS GRID
+   ======================================== */
+
+.rating-params {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rating-params h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.params-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.param-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.param-item.good {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.param-item.medium {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.param-item.bad {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.param-item.neutral {
+    background: rgba(107, 114, 128, 0.15);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.param-label {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.param-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin: 0.25rem 0;
+}
+
+.param-indicator {
+    font-size: 0.9rem;
+}
+
+.param-item.good .param-indicator {
+    color: #10b981;
+}
+
+.param-item.medium .param-indicator {
+    color: #f59e0b;
+}
+
+.param-item.bad .param-indicator {
+    color: #ef4444;
+}
+
+.param-item.neutral .param-indicator {
+    color: #6b7280;
+}
+
+.params-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+.legend-item {
+    font-size: 0.7rem;
+    color: #6b7280;
+}
+
+.legend-item.good {
+    color: #10b981;
+}
+
+.legend-item.medium {
+    color: #f59e0b;
+}
+
+.legend-item.bad {
+    color: #ef4444;
+}
+
+@media (max-width: 480px) {
+    .params-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Simple params grid (no indicators) */
+.params-grid-simple {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.param-item-simple {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.param-item-simple .param-label {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.param-item-simple .param-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin-top: 0.25rem;
+}
+
+@media (max-width: 480px) {
+    .params-grid-simple {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Fix recommend button full width */
+.recommend-btn.full-width {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
 }
